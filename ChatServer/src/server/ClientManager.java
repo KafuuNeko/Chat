@@ -1,12 +1,11 @@
-package server.global;
+package server;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
-import server.log.ServerLog;
 import server.loop.Processor;
-import server.util.Pack;
+import util.Pack;
 
 public class ClientManager {
 
@@ -30,16 +29,16 @@ public class ClientManager {
         ClientInfo info = OnlineClient.get(cl);
         try {
             if (info == null) {
-                ServerLog.warn("未找到符合的客户端：" + cl.getRemoteAddress());
+                Log.warn("未找到符合的客户端：" + cl.getRemoteAddress());
             } else {
                 if (cl.isOpen()) {
-                    ServerLog.info("关闭客户端：" + cl.getRemoteAddress());
+                    Log.info("关闭客户端：" + cl.getRemoteAddress());
                     cl.close();
                 }
                 if (remove_map) OnlineClient.remove(cl);
             }
         } catch (IOException e) {
-            ServerLog.warn("关闭客户端时发生异常：" + e.toString());
+            Log.warn("关闭客户端时发生异常：" + e.toString());
         }
     }
 
@@ -57,7 +56,7 @@ public class ClientManager {
             if (info != null) {
                 if (now - info.lastHeartBeat >= 60 * 1000) {
                     try {
-                        ServerLog.info("客户端心跳超时：" + sc.getRemoteAddress());
+                        Log.info("客户端心跳超时：" + sc.getRemoteAddress());
                     } catch (IOException ignored) {
 
                     }
@@ -118,12 +117,12 @@ public class ClientManager {
 
                     //10秒验证一次心跳包
                     sleep(10000);
-                    ServerLog.debug("CheckHeartBeatLoop...");
+                    Log.debug("CheckHeartBeatLoop...");
                     CheckAllHeartBeat();
                 }
 
             } catch (InterruptedException e) {
-                ServerLog.error("心跳包Loop异常：" + e.toString());
+                Log.error("心跳包Loop异常：" + e.toString());
             }
         }
     }

@@ -3,11 +3,11 @@ package server.loop;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import server.global.ClientManager;
-import server.log.ServerLog;
-import server.util.Pack;
-import server.util.Tea;
-import server.util.Tools;
+import server.ClientManager;
+import server.Log;
+import util.Pack;
+import util.Tea;
+import util.Tools;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -25,7 +25,7 @@ public class Processor {
 
             socketChannel.write(ByteBuffer.wrap(byteArrayOutputStream.toByteArray()));
         } catch (Exception e) {
-            ServerLog.warn(e.toString());
+            Log.warn(e.toString());
         }
     }
 
@@ -48,7 +48,7 @@ public class Processor {
                 element = jsonObject.get("heart_beat_verify");
                 if (!element.isJsonNull()) clientInfo.heartBeatVerify = element.getAsString();
 
-                ServerLog.debug(clientInfo.deviceName + "设备第一次接触了服务器，心跳包验证口令是：" + clientInfo.heartBeatVerify);
+                Log.debug(clientInfo.deviceName + "设备第一次接触了服务器，心跳包验证口令是：" + clientInfo.heartBeatVerify);
             }
             sendData(socketChannel, head.operation, head.seq, clientInfo.sessionKey);
         }

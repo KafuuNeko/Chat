@@ -10,9 +10,9 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-import server.global.ClientManager;
-import server.global.Global;
-import server.log.*;
+import server.ClientManager;
+import server.Global;
+import server.Log;
 
 public class SelectorLoop extends Thread {
     public Selector selector;
@@ -49,7 +49,7 @@ public class SelectorLoop extends Thread {
                             //客户端连接请求
                             if (Global.ServerStatus == Global.SERVER_STATUS_RUNNING) {
                                 SocketChannel channel = ((ServerSocketChannel) key.channel()).accept();
-                                ServerLog.info("客户端[" + channel.getRemoteAddress() + "]已连接到服务器");
+                                Log.info("客户端[" + channel.getRemoteAddress() + "]已连接到服务器");
                                 ClientManager.addClient(channel);
 
                                 channel.configureBlocking(false);
@@ -71,7 +71,7 @@ public class SelectorLoop extends Thread {
                         }
 
                     } catch (IOException e) {
-                        ServerLog.warn("SelectorLoop线程出现异常1：" + e.toString());
+                        Log.warn("SelectorLoop线程出现异常1：" + e.toString());
                     }
                     iterator.remove();
                 }
@@ -80,13 +80,13 @@ public class SelectorLoop extends Thread {
 
 
         } catch (IOException e) {
-            ServerLog.error("SelectorLoop线程出现异常2：" + e.toString());
+            Log.error("SelectorLoop线程出现异常2：" + e.toString());
         } catch (InterruptedException e) {
-            ServerLog.error("SelectorLoop线程出现异常3：" + e.toString());
+            Log.error("SelectorLoop线程出现异常3：" + e.toString());
         }
 
         ClientManager.clear();//断开所有连接
-        ServerLog.info("接收线程已关闭");
+        Log.info("接收线程已关闭");
     }
 
     /*
@@ -108,7 +108,7 @@ public class SelectorLoop extends Thread {
             //如果是-1则客户端已和服务器多开连接
             if (count < 0) ClientManager.closeClient(channel, true);
         } catch (IOException e) {
-            ServerLog.warn("SelectorLoop.readFromChannel出现异常：" + e.toString());
+            Log.warn("SelectorLoop.readFromChannel出现异常：" + e.toString());
         }
     }
 

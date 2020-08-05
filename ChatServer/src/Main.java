@@ -1,5 +1,3 @@
-package server.main;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,10 +5,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import server.global.ClientManager;
-import server.global.Global;
-import server.log.*;
-import server.util.Pack;
+import server.ClientManager;
+import server.Global;
+import server.Server;
+import util.Pack;
+import server.Log;
 
 public class Main {
 
@@ -35,8 +34,8 @@ public class Main {
                         Server.stop();
                         Server.selectorloop.ssChannel.close();
                         System.exit(0);
-                    case "clientnumber":
-                        ServerLog.info("当前服务器客户端数：" + ClientManager.clientNumber());
+                    case "number":
+                        Log.info("当前服务器客户端数：" + ClientManager.clientNumber());
                         break;
                 }
             } else if (Global.ServerStatus == Global.SERVER_STATUS_STOP) {
@@ -75,15 +74,15 @@ public class Main {
 
         byte[] head_bytes = Pack.makeHead(Pack.Operation.FirstContact.ordinal(), 10, data.length);
         Pack.PackHead head_object = Pack.unpackHead(head_bytes);
-        ServerLog.debug("head_bytes:" + Arrays.toString(head_bytes));
-        ServerLog.debug("head_object:" + head_object.toString());
+        Log.debug("head_bytes:" + Arrays.toString(head_bytes));
+        Log.debug("head_object:" + head_object.toString());
 
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byteArrayOutputStream.write(head_bytes);
             byteArrayOutputStream.write(data);
             byteArrayOutputStream.flush();
-            ServerLog.debug("pack:" + Arrays.toString(byteArrayOutputStream.toByteArray()));
+            Log.debug("pack:" + Arrays.toString(byteArrayOutputStream.toByteArray()));
         } catch (Exception ignored) {
 
         }

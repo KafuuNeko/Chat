@@ -1,4 +1,4 @@
-package server.global;
+package server;
 
 public class Global {
     //常量定义处

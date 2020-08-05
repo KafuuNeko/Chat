@@ -1,16 +1,14 @@
-package server.log;
+package server;
 
 /*
  * 服务器日志类*/
 
 import org.fusesource.jansi.Ansi;
-import server.global.Global;
 
-import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class ServerLog {
+public class Log {
     private static String getDateTime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
         return dateFormat.format(Calendar.getInstance().getTime());
