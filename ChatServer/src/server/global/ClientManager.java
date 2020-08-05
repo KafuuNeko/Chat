@@ -71,9 +71,25 @@ public class ClientManager {
     public static class ClientInfo {
         public long lastHeartBeat = 0;
         public byte[] sessionKey = null;
+        public String deviceName = "";
+        public String heartBeatVerify = "";
+
         public ClientInfo(long lastHeartBeat)
         {
             this.lastHeartBeat = lastHeartBeat;
+        }
+
+        public ClientInfo(long lastHeartBeat, byte[] sessionKey)
+        {
+            this.lastHeartBeat = lastHeartBeat;
+            this.sessionKey = sessionKey;
+        }
+
+        public ClientInfo(long lastHeartBeat, byte[] sessionKey, String deviceName)
+        {
+            this.lastHeartBeat = lastHeartBeat;
+            this.sessionKey = sessionKey;
+            this.deviceName = deviceName;
         }
     }
 

@@ -128,6 +128,7 @@ public class SelectorLoop extends Thread implements Pack.IPackProcessor {
                 break;
 
             case HeartBeat:
+                Processor.heartBeat(socketChannel, head, data);
                 break;
         }
     }

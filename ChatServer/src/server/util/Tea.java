@@ -1,5 +1,8 @@
 package server.util;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 public class Tea {
     private static int mDelta = 0x9e3779b9;
 
@@ -78,9 +81,14 @@ public class Tea {
         }
         return tempInt;
     }
+
+    //加密String 编码：UTF-8
+    public static byte[] encryptByTea(String info, byte[] key) {
+        return encryptByTea(info, key, StandardCharsets.UTF_8);
+    }
     
-    public static byte[] encryptByTea(String info, byte[] key){
-        byte[] temp = info.getBytes();
+    public static byte[] encryptByTea(String info, byte[] key, Charset charset){
+        byte[] temp = info.getBytes(charset);
         int fill = 8 - temp.length % 8;//若temp的位数不足8的倍数,需要填充的位数
         byte[] encryptStr = new byte[temp.length + fill];
         encryptStr[0] = (byte)fill;
@@ -93,8 +101,12 @@ public class Tea {
         return result;
     }
 
-    //通过TEA算法解密信息
     public static String decryptByTea(byte[] secretInfo, byte[] key) {
+        return decryptByTea(secretInfo, key, StandardCharsets.UTF_8);
+    }
+
+    //通过TEA算法解密信息
+    public static String decryptByTea(byte[] secretInfo, byte[] key, Charset charset) {
         byte[] decryptStr = null;
         byte[] tempDecrypt = new byte[secretInfo.length];
         for (int offset = 0; offset < secretInfo.length; offset += 8) {
@@ -102,6 +114,6 @@ public class Tea {
             System.arraycopy(decryptStr, 0, tempDecrypt, offset, 8);
         }
         int n = tempDecrypt[0];
-        return new String(tempDecrypt, n, decryptStr.length - n);
+        return new String(tempDecrypt, n, decryptStr.length - n, charset);
     }
 }

@@ -6,20 +6,19 @@ import java.nio.channels.SocketChannel;
 
 public class Pack {
 
-    public final static int head_len = 16;
+    public final static int head_size = 16;
     public final static byte start_flag = 0xc;
     public final static int version = 0x01;
 
-    public static byte[] makeHead(int op, int seq, int data_len)
-    {
-        return makeHead(version, op, seq, data_len);
+    public static byte[] makeHead(int operation, int seq, int size) {
+        return makeHead(version, operation, seq, size);
     }
 
-    public static byte[] makeHead(int version, int op, int seq, int data_len) {
+    public static byte[] makeHead(int version, int operation, int seq, int size) {
         int i = 0;
 
-        byte[] result = new byte[head_len];
-        int pack_len = head_len + data_len;
+        byte[] result = new byte[head_size];
+        int pack_len = head_size + size;
 
         result[i++] = start_flag;
 
@@ -27,7 +26,7 @@ public class Pack {
         for (int j = 0; j < 4; ++j) result[i++] = (byte) (pack_len >> ((3 - j) * 8) & 0xFF);
 
         //数据校验位
-        byte verify = (byte) (((data_len % head_len) ^ (op ^ seq)) % 127);
+        byte verify = (byte) (((size % head_size) ^ (operation ^ seq)) % 127);
         result[i++] = verify;
 
         //协议版本
@@ -35,7 +34,7 @@ public class Pack {
         result[i++] = (byte) (version);
 
         //操作码
-        for (int j = 0; j < 4; ++j) result[i++] = (byte) (op >> ((3 - j) * 8) & 0xFF);
+        for (int j = 0; j < 4; ++j) result[i++] = (byte) (operation >> ((3 - j) * 8) & 0xFF);
 
         //SeqMake
         for (int j = 0; j < 4; ++j) result[i++] = (byte) (seq >> ((3 - j) * 8) & 0xFF);
@@ -48,7 +47,7 @@ public class Pack {
         if (head[0] != start_flag) return null;
 
         //总长度
-        int len = analysis(head, 1, 4);
+        int size = analysis(head, 1, 4);
 
         //数据校验
         int verify = analysis(head, 5, 1);
@@ -62,13 +61,12 @@ public class Pack {
         //获取操作码
         int seq = analysis(head, 12, 4);
 
-        return new PackHead(versions, operation, len, verify, seq);
+        return new PackHead(versions, operation, size, verify, seq);
     }
 
-    private static int analysis(byte[] data, int offset, int len)
-    {
+    private static int analysis(byte[] data, int offset, int size) {
         int result = 0;
-        for (int j = 0; j < len; ++j) {
+        for (int j = 0; j < size; ++j) {
             int temp = data[offset++] & 0xFF;
             result <<= 8;
             result |= temp;
@@ -79,7 +77,7 @@ public class Pack {
 
     private IPackProcessor mPackProcessor;
     private PackHead mHeadInfo = null;
-    private byte[] mHeadBuff = new byte[head_len];
+    private byte[] mHeadBuff = new byte[head_size];
     private int mHeadGetSize = 0;
     private ByteArrayOutputStream mDataBuff = null;
     private int mDataGetSize = 0;
@@ -95,13 +93,13 @@ public class Pack {
                 //包头信息对象为空，则不断向缓冲区写入字节
                 mHeadBuff[mHeadGetSize++] = bt;
 
-                if (mHeadGetSize == head_len) {
+                if (mHeadGetSize == head_size) {
                     //如果当前包头缓冲区已被填满，则对包头缓冲区数据执行解包操作
                     mHeadInfo = unpackHead(mHeadBuff);
                     if (mHeadInfo != null) {
                         //验证解包头信息后包头信息是否合法
-                        byte verify = (byte) (((mHeadInfo.length % head_len) ^ (mHeadInfo.operation ^ mHeadInfo.seq)) % 127);
-                        if (mHeadInfo.length <= head_len || mHeadInfo.verify != verify) {
+                        byte verify = (byte) (((mHeadInfo.size % head_size) ^ (mHeadInfo.operation ^ mHeadInfo.seq)) % 127);
+                        if (mHeadInfo.size <= head_size || mHeadInfo.verify != verify) {
                             mHeadInfo = null;
                         } else {
                             //包头信息合法 构造包头对象
@@ -117,7 +115,7 @@ public class Pack {
                 assert mDataBuff != null;
                 mDataBuff.write(bt);
 
-                if (++mDataGetSize == mHeadInfo.length - head_len) {
+                if (++mDataGetSize == mHeadInfo.size - head_size) {
                     mDataBuff.flush();
 
                     mPackProcessor.onPackUnpack(address, mHeadInfo, mDataBuff.toByteArray());
@@ -135,22 +133,20 @@ public class Pack {
     public static class PackHead {
         public int versions;
         public int operation;
-        public int length;
+        public int size;
         public int verify;
         public int seq;
 
-        public PackHead(int versions, int operation, int length, int verify, int seq)
-        {
+        public PackHead(int versions, int operation, int size, int verify, int seq) {
             this.versions = versions;
             this.operation = operation;
-            this.length = length;
+            this.size = size;
             this.verify = verify;
             this.seq = seq;
         }
 
-        public String toString()
-        {
-            return "Version:"+ this.versions+",operation:"+this.operation+",length:"+this.length+",verify:"+this.verify+",seq:"+this.seq;
+        public String toString() {
+            return "Version:" + this.versions + ",operation:" + this.operation + ",size:" + this.size + ",verify:" + this.verify + ",seq:" + this.seq;
         }
 
     }
@@ -164,8 +160,7 @@ public class Pack {
         HeartBeat
     }
 
-    public static Operation getOperation(int index)
-    {
+    public static Operation getOperation(int index) {
         Operation[] ops = Operation.values();
         if (ops.length <= index) return null;
         return ops[index];
