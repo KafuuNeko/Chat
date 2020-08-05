@@ -1,6 +1,9 @@
 package server;
 
-public class Global {
+/**
+ * 此类包含所有服务器的定义
+ * */
+public class Definition {
     //常量定义处
     public static final boolean IS_DEBUG = true;
 

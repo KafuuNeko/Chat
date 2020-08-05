@@ -5,8 +5,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import server.ClientManager;
-import server.Global;
+import server.client.ClientManager;
+import server.Definition;
 import server.Server;
 import util.Pack;
 import server.Log;
@@ -14,7 +14,7 @@ import server.Log;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        if (Global.IS_DEBUG) debug();
+        if (Definition.IS_DEBUG) debug();
         init();
 
         Server.start();
@@ -24,7 +24,7 @@ public class Main {
         while (true) {
             String inData = br.readLine();
 
-            if (Global.ServerStatus == Global.SERVER_STATUS_RUNNING) {
+            if (Definition.ServerStatus == Definition.SERVER_STATUS_RUNNING) {
                 //当服务器状态为 运行中 时执行的代码
                 switch (inData) {
                     case "stop":
@@ -38,7 +38,7 @@ public class Main {
                         Log.info("当前服务器客户端数：" + ClientManager.clientNumber());
                         break;
                 }
-            } else if (Global.ServerStatus == Global.SERVER_STATUS_STOP) {
+            } else if (Definition.ServerStatus == Definition.SERVER_STATUS_STOP) {
                 //当服务器状态为 停止 时执行的代码
                 if (inData.equals("start")) {
                     Server.start();
@@ -57,7 +57,7 @@ public class Main {
         while (true) {
             try {
                 System.out.print("Server port:");
-                Global.SERVER_PORT = Integer.parseInt(br.readLine());
+                Definition.SERVER_PORT = Integer.parseInt(br.readLine());
                 Server.init();
                 break;
             } catch (NumberFormatException ignored) {

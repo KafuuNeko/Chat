@@ -3,7 +3,8 @@ package server.loop;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import server.ClientManager;
+import server.client.ClientInfo;
+import server.client.ClientManager;
 import server.Log;
 import util.Pack;
 import util.Tea;
@@ -16,6 +17,18 @@ import java.nio.charset.StandardCharsets;
 
 public class Processor {
 
+    /**
+     * 向客户端发送信息
+     * 将信息打包并直接发送给客户端
+     *
+     * @param   socketChannel   接收信息的客户端
+     *
+     * @param   operation       操作类型序号
+     *
+     * @param   seq             操作序列号
+     *
+     * @param   data            将要发送的数据
+     * */
     public static void sendData(SocketChannel socketChannel, int operation, int seq, byte[] data) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -37,7 +50,7 @@ public class Processor {
     public static void firstContact(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
         if (data == null) return;
 
-        ClientManager.ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
+        ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
         if (clientInfo != null && clientInfo.sessionKey == null) {
             clientInfo.sessionKey = Tools.RandomlyGeneratedKey(16);
             JsonObject jsonObject = new Gson().fromJson(new String(data, StandardCharsets.UTF_8), JsonObject.class);
@@ -62,7 +75,7 @@ public class Processor {
     public static void heartBeat(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
         if (data == null) return;
 
-        ClientManager.ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
+        ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
         JsonObject result = new JsonObject();
 
         if (clientInfo != null && clientInfo.sessionKey != null) {

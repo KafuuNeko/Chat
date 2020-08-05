@@ -2,14 +2,19 @@ package server;
 
 import java.io.IOException;
 
+import server.client.ClientManager;
+import server.loop.HeartBeatLoop;
 import server.loop.SelectorLoop;
 
 public class Server {
     public static SelectorLoop selectorloop;
-    public static ClientManager.HeartBeatLoop heartBeatLoop;
+    public static HeartBeatLoop heartBeatLoop;
 
+    /**
+     * 初始化服务器
+     * */
     public static void init() throws IOException {
-        Global.ServerStatus = Global.SERVER_STATUS_SUSPENDED;//置服务器状态为挂起状态
+        Definition.ServerStatus = Definition.SERVER_STATUS_SUSPENDED;//置服务器状态为挂起状态
 
         Log.info("正在初始化服务器....");
 
@@ -19,25 +24,27 @@ public class Server {
 
         Log.info("Init HeartBeatLoop...");
 
-        heartBeatLoop = new ClientManager.HeartBeatLoop();
+        heartBeatLoop = new HeartBeatLoop();
         heartBeatLoop.start();
 
         Log.info("服务器初始化完成.");
-        Global.ServerStatus = Global.SERVER_STATUS_STOP;//置服务器状态为停止状态
+        Definition.ServerStatus = Definition.SERVER_STATUS_STOP;//置服务器状态为停止状态
     }
 
-    /*
-     * 启动服务器*/
+    /**
+     * 启动服务器
+     * */
     public static void start() throws IOException {
-        Global.ServerStatus = Global.SERVER_STATUS_RUNNING;//置服务器为运行状态
+        Definition.ServerStatus = Definition.SERVER_STATUS_RUNNING;//置服务器为运行状态
         Log.info("服务器已启动");
     }
 
-    /*
-     * 关闭服务器*/
+    /**
+     * 关闭服务器
+     * */
     public static void stop() throws IOException {
-        Global.ServerStatus = Global.SERVER_STATUS_STOP;//置服务器为关闭状态
-        ClientManager.clear();
+        Definition.ServerStatus = Definition.SERVER_STATUS_STOP;//置服务器为关闭状态
+        ClientManager.stopAllClient();
         Log.info("服务器已关闭");
     }
 }

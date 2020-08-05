@@ -10,8 +10,9 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-import server.ClientManager;
-import server.Global;
+import server.client.ClientInfo;
+import server.client.ClientManager;
+import server.Definition;
 import server.Log;
 
 public class SelectorLoop extends Thread {
@@ -22,7 +23,7 @@ public class SelectorLoop extends Thread {
         selector = Selector.open();
 
         ssChannel = ServerSocketChannel.open();
-        ssChannel.bind(new InetSocketAddress(Global.SERVER_PORT));
+        ssChannel.bind(new InetSocketAddress(Definition.SERVER_PORT));
         ssChannel.configureBlocking(false);
         ssChannel.register(selector, SelectionKey.OP_ACCEPT);
 
@@ -34,7 +35,7 @@ public class SelectorLoop extends Thread {
 
         try {
             do {
-                while (Global.ServerStatus == Global.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起状态
+                while (Definition.ServerStatus == Definition.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起状态
 
                 selector.select();
 
@@ -47,7 +48,7 @@ public class SelectorLoop extends Thread {
                     try {
                         if (key.isAcceptable()) {
                             //客户端连接请求
-                            if (Global.ServerStatus == Global.SERVER_STATUS_RUNNING) {
+                            if (Definition.ServerStatus == Definition.SERVER_STATUS_RUNNING) {
                                 SocketChannel channel = ((ServerSocketChannel) key.channel()).accept();
                                 Log.info("客户端[" + channel.getRemoteAddress() + "]已连接到服务器");
                                 ClientManager.addClient(channel);
@@ -64,9 +65,9 @@ public class SelectorLoop extends Thread {
                         } else if (key.isReadable()) {
                             //客户端数据来源
                             //当服务器处于运行状态时，读取通道中的数据
-                            if (Global.ServerStatus == Global.SERVER_STATUS_RUNNING) {
+                            if (Definition.ServerStatus == Definition.SERVER_STATUS_RUNNING) {
                                 SocketChannel channel = (SocketChannel) key.channel();
-                                readFromChannel(channel);
+                                receiveFromChannel(channel);
                             }
                         }
 
@@ -76,7 +77,7 @@ public class SelectorLoop extends Thread {
                     iterator.remove();
                 }
 
-            } while (Global.ServerStatus != Global.SERVER_STATUS_ERROR);
+            } while (Definition.ServerStatus != Definition.SERVER_STATUS_ERROR);
 
 
         } catch (IOException e) {
@@ -85,13 +86,15 @@ public class SelectorLoop extends Thread {
             Log.error("SelectorLoop线程出现异常3：" + e.toString());
         }
 
-        ClientManager.clear();//断开所有连接
+        ClientManager.stopAllClient();//断开所有连接
         Log.info("接收线程已关闭");
     }
 
-    /*
-     * 获取客户端数据*/
-    private void readFromChannel(SocketChannel channel) {
+    /**
+     * 从客户端获取到数据
+     * @param channel 数据来源客户端
+     * */
+    private void receiveFromChannel(SocketChannel channel) {
         int count;
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         try {
@@ -101,7 +104,7 @@ public class SelectorLoop extends Thread {
                 byte[] bytes = new byte[buffer.remaining()];
                 buffer.get(bytes);
 
-                ClientManager.ClientInfo info = ClientManager.getClientInfo(channel);
+                ClientInfo info = ClientManager.getClientInfo(channel);
                 if (info != null) info.disposeBytes(channel, bytes);
             }
 
