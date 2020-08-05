@@ -5,6 +5,8 @@ import java.nio.channels.SocketChannel;
 import java.util.*;
 
 import server.log.ServerLog;
+import server.loop.Processor;
+import server.util.Pack;
 
 public class ClientManager {
 
@@ -68,28 +70,41 @@ public class ClientManager {
         for (SocketChannel sc : closed) OnlineClient.remove(sc);
     }
 
-    public static class ClientInfo {
+    public static class ClientInfo implements Pack.IPackProcessor {
+        //此客户端最近一次的心跳时间
         public long lastHeartBeat = 0;
+        //通讯密钥，此客户端与服务器的通讯均采用此密钥加密
         public byte[] sessionKey = null;
+        //客户端设备名称
         public String deviceName = "";
+        //客户端心跳包验证口令
         public String heartBeatVerify = "";
 
-        public ClientInfo(long lastHeartBeat)
-        {
+        //客户端包处理
+        private Pack mPack = new Pack(this);
+
+        public ClientInfo(long lastHeartBeat) {
             this.lastHeartBeat = lastHeartBeat;
         }
 
-        public ClientInfo(long lastHeartBeat, byte[] sessionKey)
+        public void disposeBytes(SocketChannel socketChannel, byte[] data) throws IOException
         {
-            this.lastHeartBeat = lastHeartBeat;
-            this.sessionKey = sessionKey;
+            mPack.disposeBytes(socketChannel, data);
         }
 
-        public ClientInfo(long lastHeartBeat, byte[] sessionKey, String deviceName)
-        {
-            this.lastHeartBeat = lastHeartBeat;
-            this.sessionKey = sessionKey;
-            this.deviceName = deviceName;
+        @Override
+        public void onPackUnpack(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
+            Pack.Operation operation = Pack.getOperation(head.operation);
+            if (operation == null) return;
+            switch (operation) {
+                case FirstContact:
+                    Processor.firstContact(socketChannel, head, data);
+                    break;
+
+                case HeartBeat:
+                    Processor.heartBeat(socketChannel, head, data);
+                    break;
+            }
         }
     }
 
@@ -115,8 +130,7 @@ public class ClientManager {
         }
     }
 
-    public static ClientInfo getClientInfo(SocketChannel socketChannel)
-    {
+    public static ClientInfo getClientInfo(SocketChannel socketChannel) {
         return OnlineClient.get(socketChannel);
     }
 }

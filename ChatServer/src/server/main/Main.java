@@ -1,12 +1,17 @@
 package server.main;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import server.global.ClientManager;
 import server.global.Global;
 import server.log.*;
+import server.util.Pack;
 
 public class Main {
 
@@ -67,6 +72,22 @@ public class Main {
     }
 
     private static void debug() {
+        byte[] data = "{'device_name':'Windows', 'heart_beat_verify':'Hello heart beat'}".getBytes(StandardCharsets.UTF_8);
+
+        byte[] head_bytes = Pack.makeHead(Pack.Operation.FirstContact.ordinal(), 10, data.length);
+        Pack.PackHead head_object = Pack.unpackHead(head_bytes);
+        ServerLog.debug("head_bytes:" + Arrays.toString(head_bytes));
+        ServerLog.debug("head_object:" + head_object.toString());
+
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byteArrayOutputStream.write(head_bytes);
+            byteArrayOutputStream.write(data);
+            byteArrayOutputStream.flush();
+            ServerLog.debug("pack:" + Arrays.toString(byteArrayOutputStream.toByteArray()));
+        } catch (Exception ignored) {
+
+        }
 
     }
 

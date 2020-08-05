@@ -33,8 +33,10 @@ public class Processor {
      * 第一次接触服务器
      * 客户端需要提供的信息有：设备名称(device_name), 心跳包验证信息(heart_beat_verify)
      * 接触服务器后将向客户端发送通讯密钥，接下来所有的数据将全部使用此密钥加密
-     * */
-    public synchronized static void firstContact(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
+     */
+    public static void firstContact(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
+        if (data == null) return;
+
         ClientManager.ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
         if (clientInfo != null && clientInfo.sessionKey == null) {
             clientInfo.sessionKey = Tools.RandomlyGeneratedKey(16);
@@ -45,6 +47,8 @@ public class Processor {
                 if (!element.isJsonNull()) clientInfo.deviceName = element.getAsString();
                 element = jsonObject.get("heart_beat_verify");
                 if (!element.isJsonNull()) clientInfo.heartBeatVerify = element.getAsString();
+
+                ServerLog.debug(clientInfo.deviceName + "设备第一次接触了服务器，心跳包验证口令是：" + clientInfo.heartBeatVerify);
             }
             sendData(socketChannel, head.operation, head.seq, clientInfo.sessionKey);
         }
@@ -54,8 +58,10 @@ public class Processor {
      * 处理从客户端接收到的心跳包信息
      * 心跳包信息格式为：[包头][验证信息], 其中[验证信息]使用通讯密钥加密
      * 如果处理成功服务器将返回处理成功信息，使用通讯密钥加密
-     * */
-    public synchronized static void heartBeat(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
+     */
+    public static void heartBeat(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
+        if (data == null) return;
+
         ClientManager.ClientInfo clientInfo = ClientManager.getClientInfo(socketChannel);
         JsonObject result = new JsonObject();
 

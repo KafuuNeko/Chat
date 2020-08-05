@@ -13,13 +13,10 @@ import java.util.Set;
 import server.global.ClientManager;
 import server.global.Global;
 import server.log.*;
-import server.util.Pack;
 
-public class SelectorLoop extends Thread implements Pack.IPackProcessor {
+public class SelectorLoop extends Thread {
     public Selector selector;
     public ServerSocketChannel ssChannel;
-    private static ByteBuffer buffer = ByteBuffer.allocate(1024);
-    private Pack mPack;
 
     public SelectorLoop() throws IOException {
         selector = Selector.open();
@@ -29,7 +26,6 @@ public class SelectorLoop extends Thread implements Pack.IPackProcessor {
         ssChannel.configureBlocking(false);
         ssChannel.register(selector, SelectionKey.OP_ACCEPT);
 
-        mPack = new Pack(this);
     }
 
 
@@ -38,7 +34,7 @@ public class SelectorLoop extends Thread implements Pack.IPackProcessor {
 
         try {
             do {
-                while (Global.ServerStatus == Global.SERVER_STATUS_SUSPENDED) super.sleep(1000);//挂起状态
+                while (Global.ServerStatus == Global.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起状态
 
                 selector.select();
 
@@ -98,38 +94,23 @@ public class SelectorLoop extends Thread implements Pack.IPackProcessor {
      * 获取客户端数据*/
     private void readFromChannel(SocketChannel channel) {
         int count;
-        buffer.clear();
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
         try {
             while ((count = channel.read(buffer)) > 0) {
-                buffer.flip();
+                buffer.flip();//翻转缓冲区
+
                 byte[] bytes = new byte[buffer.remaining()];
                 buffer.get(bytes);
 
-                mPack.disposeBytes(channel, bytes);
+                ClientManager.ClientInfo info = ClientManager.getClientInfo(channel);
+                if (info != null) info.disposeBytes(channel, bytes);
             }
-            if (count < 0) {
-                ClientManager.closeClient(channel, true);
-            }
+
+            //如果是-1则客户端已和服务器多开连接
+            if (count < 0) ClientManager.closeClient(channel, true);
         } catch (IOException e) {
             ServerLog.warn("SelectorLoop.readFromChannel出现异常：" + e.toString());
         }
     }
 
-
-
-    @Override
-    public void onPackUnpack(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
-        Pack.Operation operation = Pack.getOperation(head.operation);
-        if (operation == null) return;
-        switch (operation)
-        {
-            case FirstContact:
-                Processor.firstContact(socketChannel, head, data);
-                break;
-
-            case HeartBeat:
-                Processor.heartBeat(socketChannel, head, data);
-                break;
-        }
-    }
 }
