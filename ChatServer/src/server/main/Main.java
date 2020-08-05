@@ -12,6 +12,7 @@ import server.global.Global;
 import server.log.*;
 import server.util.Pack;
 import server.util.Tea;
+import server.util.Tools;
 
 public class Main implements Pack.IPackProcessor {
 
@@ -72,13 +73,13 @@ public class Main implements Pack.IPackProcessor {
     }
 
     private static void debug() {
-        byte[] key = {12, 43, 35, 14, 42, 101, 45, 24, 17, 53, 95, 23, 61, 36, 13, 76};
+        byte[] key = Tools.RandomlyGeneratedKey(16);
         byte[] en_result = Tea.encryptByTea("Hello World", key);
         String de_result = Tea.decryptByTea(en_result, key);
 
+        System.out.println("key:" + Arrays.toString(key));
         System.out.println("en:" + Arrays.toString(en_result));
         System.out.println("de:" + de_result);
-
 
         byte[] con = {-128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128, -128};
         byte[] con_en_res = Tea.encrypt(con, 0, key, 32);
@@ -89,7 +90,7 @@ public class Main implements Pack.IPackProcessor {
 
         byte[] headTD1 = "Hello Client".getBytes();
 
-        byte[] head = Pack.makeHead(1001, 1, 1, headTD1.length);
+        byte[] head = Pack.makeHead(1001, 0, 1, headTD1.length);
         System.out.println("head:" + Arrays.toString(head));
         Pack.PackHead packHead = Pack.unpackHead(head);
         assert packHead != null;

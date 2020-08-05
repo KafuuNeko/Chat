@@ -115,18 +115,20 @@ public class SelectorLoop extends Thread implements Pack.IPackProcessor {
         }
     }
 
+
+
     @Override
     public void onPackUnpack(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
-        if (head.operation == 1)
+        Pack.Operation operation = Pack.getOperation(head.operation);
+        if (operation == null) return;
+        switch (operation)
         {
-            try {
+            case FirstContact:
+                Processor.firstContact(socketChannel, head, data);
+                break;
 
-                ServerLog.debug("[" + socketChannel.getRemoteAddress().toString() + "]lastHeartBeat:" + ClientManager.OnlineClient.get(socketChannel).lastHeartBeat);
-            }
-            catch (Exception e)
-            {
-
-            }
+            case HeartBeat:
+                break;
         }
     }
 }

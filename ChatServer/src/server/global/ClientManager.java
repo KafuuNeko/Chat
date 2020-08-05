@@ -70,6 +70,7 @@ public class ClientManager {
 
     public static class ClientInfo {
         public long lastHeartBeat = 0;
+        public byte[] sessionKey = null;
         public ClientInfo(long lastHeartBeat)
         {
             this.lastHeartBeat = lastHeartBeat;
@@ -96,5 +97,10 @@ public class ClientManager {
                 ServerLog.debug("心跳包Loop异常：" + e.toString());
             }
         }
+    }
+
+    public static ClientInfo getClientInfo(SocketChannel socketChannel)
+    {
+        return OnlineClient.get(socketChannel);
     }
 }

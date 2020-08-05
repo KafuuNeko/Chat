@@ -8,6 +8,12 @@ public class Pack {
 
     public final static int head_len = 16;
     public final static byte start_flag = 0xc;
+    public final static int version = 0x01;
+
+    public static byte[] makeHead(int op, int seq, int data_len)
+    {
+        return makeHead(version, op, seq, data_len);
+    }
 
     public static byte[] makeHead(int version, int op, int seq, int data_len) {
         int i = 0;
@@ -151,5 +157,17 @@ public class Pack {
 
     public interface IPackProcessor {
         void onPackUnpack(SocketChannel socketChannel, PackHead head, byte[] data);
+    }
+
+    public enum Operation {
+        FirstContact,
+        HeartBeat
+    }
+
+    public static Operation getOperation(int index)
+    {
+        Operation[] ops = Operation.values();
+        if (ops.length <= index) return null;
+        return ops[index];
     }
 }
