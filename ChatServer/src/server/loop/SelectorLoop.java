@@ -80,14 +80,13 @@ public class SelectorLoop extends Thread {
 
 
         } catch (IOException e) {
-            ServerLog.warn("SelectorLoop线程出现异常2：" + e.toString());
+            ServerLog.error("SelectorLoop线程出现异常2：" + e.toString());
         } catch (InterruptedException e) {
-            ServerLog.warn("SelectorLoop线程出现异常3：" + e.toString());
+            ServerLog.error("SelectorLoop线程出现异常3：" + e.toString());
         }
 
         ClientManager.clear();//断开所有连接
         ServerLog.info("接收线程已关闭");
-
     }
 
     /*

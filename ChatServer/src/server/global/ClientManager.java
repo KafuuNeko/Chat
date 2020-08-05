@@ -113,7 +113,6 @@ public class ClientManager {
         public void run() {
 
             try {
-
                 while (Global.ServerStatus != Global.SERVER_STATUS_ERROR) {
                     while (Global.ServerStatus == Global.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起等待
 
@@ -123,9 +122,8 @@ public class ClientManager {
                     CheckAllHeartBeat();
                 }
 
-
             } catch (InterruptedException e) {
-                ServerLog.debug("心跳包Loop异常：" + e.toString());
+                ServerLog.error("心跳包Loop异常：" + e.toString());
             }
         }
     }
