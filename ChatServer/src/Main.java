@@ -8,6 +8,7 @@ import java.util.Arrays;
 import server.client.ClientManager;
 import server.Definition;
 import server.Server;
+import util.CRC32;
 import util.Pack;
 import server.Log;
 
@@ -71,6 +72,8 @@ public class Main {
 
     private static void debug() {
         byte[] data = "{'device_name':'Windows', 'heart_beat_verify':'Hello heart beat'}".getBytes(StandardCharsets.UTF_8);
+
+        Log.debug("data crc32:" + CRC32.getValue(data));
 
         byte[] head_bytes = Pack.makeHead(Pack.Operation.FirstContact.ordinal(), 10, data.length);
         Pack.PackHead head_object = Pack.unpackHead(head_bytes);

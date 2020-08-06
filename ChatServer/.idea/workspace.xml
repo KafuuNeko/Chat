@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="ChatServer:jar" />
+    </artifacts-to-build>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="3b861344-517c-44eb-8c5b-c6aa62eb6d80" name="默认更改列表" comment="">
-      <change afterPath="$PROJECT_DIR$/src/server/client/ClientInfo.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/server/loop/HeartBeatLoop.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/ChatServer_jar.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/util/CRC32.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/ClientManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/client/ClientManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/Global.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Definition.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/server/Log.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Log.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/loop/Processor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/loop/Processor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server/loop/SelectorLoop.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/loop/SelectorLoop.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/Tools.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/Tools.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,9 +43,9 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/lib/jansi-1.9.jar!/" />
-    <property name="project.structure.last.edited" value="模块" />
+    <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.0" />
-    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
   </component>
   <component name="RecentsManager">
     <key name="MoveInnerDialog.RECENTS_KEY">
@@ -110,6 +110,9 @@
       <workItem from="1596631823680" duration="102000" />
       <workItem from="1596632611469" duration="547000" />
       <workItem from="1596633367083" duration="998000" />
+      <workItem from="1596680161218" duration="3093000" />
+      <workItem from="1596684403722" duration="393000" />
+      <workItem from="1596692242366" duration="2166000" />
     </task>
     <servers />
   </component>
@@ -117,6 +120,10 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="370" y="168" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1596682417861">
+      <screen x="0" y="0" width="1280" height="770" />
+    </state>
+    <state x="370" y="168" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1280.770@0.0.1280.770" timestamp="1596682417861" />
     <state x="490" y="309" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1596633512669">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
@@ -141,22 +148,22 @@
       <screen x="0" y="0" width="1280" height="770" />
     </state>
     <state x="420" y="110" key="FileChooserDialogImpl/0.0.1280.770@0.0.1280.770" timestamp="1596630350694" />
-    <state width="1237" height="149" key="GridCell.Tab.0.bottom" timestamp="1596634366040">
+    <state width="1237" height="184" key="GridCell.Tab.0.bottom" timestamp="1596694412258">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
-    <state width="1237" height="149" key="GridCell.Tab.0.bottom/0.0.1280.770@0.0.1280.770" timestamp="1596634366040" />
-    <state width="1237" height="149" key="GridCell.Tab.0.center" timestamp="1596634366039">
+    <state width="1237" height="184" key="GridCell.Tab.0.bottom/0.0.1280.770@0.0.1280.770" timestamp="1596694412258" />
+    <state width="1237" height="184" key="GridCell.Tab.0.center" timestamp="1596694412257">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
-    <state width="1237" height="149" key="GridCell.Tab.0.center/0.0.1280.770@0.0.1280.770" timestamp="1596634366039" />
-    <state width="1237" height="149" key="GridCell.Tab.0.left" timestamp="1596634366039">
+    <state width="1237" height="184" key="GridCell.Tab.0.center/0.0.1280.770@0.0.1280.770" timestamp="1596694412257" />
+    <state width="1237" height="184" key="GridCell.Tab.0.left" timestamp="1596694412257">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
-    <state width="1237" height="149" key="GridCell.Tab.0.left/0.0.1280.770@0.0.1280.770" timestamp="1596634366039" />
-    <state width="1237" height="149" key="GridCell.Tab.0.right" timestamp="1596634366040">
+    <state width="1237" height="184" key="GridCell.Tab.0.left/0.0.1280.770@0.0.1280.770" timestamp="1596694412257" />
+    <state width="1237" height="184" key="GridCell.Tab.0.right" timestamp="1596694412257">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
-    <state width="1237" height="149" key="GridCell.Tab.0.right/0.0.1280.770@0.0.1280.770" timestamp="1596634366040" />
+    <state width="1237" height="184" key="GridCell.Tab.0.right/0.0.1280.770@0.0.1280.770" timestamp="1596694412257" />
     <state width="1237" height="193" key="GridCell.Tab.1.bottom" timestamp="1596547389109">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
@@ -173,10 +180,10 @@
       <screen x="0" y="0" width="1280" height="770" />
     </state>
     <state width="1237" height="193" key="GridCell.Tab.1.right/0.0.1280.770@0.0.1280.770" timestamp="1596547389109" />
-    <state x="120" y="0" key="SettingsEditor" timestamp="1596630354207">
+    <state x="120" y="0" key="SettingsEditor" timestamp="1596682423457">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
-    <state x="120" y="0" key="SettingsEditor/0.0.1280.770@0.0.1280.770" timestamp="1596630354207" />
+    <state x="120" y="0" key="SettingsEditor/0.0.1280.770@0.0.1280.770" timestamp="1596682423457" />
     <state x="303" y="91" width="672" height="678" key="search.everywhere.popup" timestamp="1596503252758">
       <screen x="0" y="0" width="1280" height="770" />
     </state>
