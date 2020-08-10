@@ -1,28 +1,32 @@
 package server.client;
 
 import server.Log;
+import server.Server;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 
+/**
+ * 客户端管理器
+ * */
 public class ClientManager {
 
     //在线的客户端以及对应的客户端信息
-    public static Map<SocketChannel, ClientInfo> OnlineClient = new HashMap<>();
+    public Map<SocketChannel, Client> OnlineClient = new HashMap<>();
 
     /**
      * 获取当前在线的客户端数量
      * */
-    public static int clientNumber() {
+    public int clientNumber() {
         return OnlineClient.size();
     }
 
     /**
      * 添加新的在线客户端
      * */
-    public static void addClient(SocketChannel cl) {
-        OnlineClient.put(cl, new ClientInfo(System.currentTimeMillis()));
+    public void addClient(Server server, SocketChannel cl) {
+        OnlineClient.put(cl, new Client(server, System.currentTimeMillis()));
     }
 
     /**
@@ -30,10 +34,10 @@ public class ClientManager {
      * @param cl 要关闭的客户端
      * @param remove_map 关闭此客户端后是否立即从Map中移除
      * */
-    public static void closeClient(SocketChannel cl, boolean remove_map) {
-        ClientInfo info = OnlineClient.get(cl);
+    public void closeClient(SocketChannel cl, boolean remove_map) {
+        Client client = OnlineClient.get(cl);
         try {
-            if (info == null) {
+            if (client == null) {
                 Log.warn("未找到符合的客户端：" + cl.getRemoteAddress());
             } else {
                 if (cl.isOpen()) {
@@ -50,7 +54,7 @@ public class ClientManager {
     /**
      * 主动关闭所有在线的客户端
      * */
-    public static void stopAllClient() {
+    public void closeAllClient() {
         for (SocketChannel sc : OnlineClient.keySet()) closeClient(sc, false);
         OnlineClient.clear();
     }
@@ -59,14 +63,14 @@ public class ClientManager {
      * 验证所有在线的客户端的心跳包
      * 如果最近的心跳包在60秒之前，则主动断开此客户端的连接
      * */
-    public static void CheckAllHeartBeat() {
+    public void checkAllHeartBeat() {
         Set<SocketChannel> closed = new HashSet<>();
 
         long now = System.currentTimeMillis();
         for (SocketChannel sc : OnlineClient.keySet()) {
-            ClientInfo info = OnlineClient.get(sc);
-            if (info != null) {
-                if (now - info.lastHeartBeat >= 60 * 1000) {
+            Client client = OnlineClient.get(sc);
+            if (client != null) {
+                if (now - client.lastHeartBeat >= 60 * 1000) {
                     try {
                         Log.info("客户端心跳超时：" + sc.getRemoteAddress());
                     } catch (IOException ignored) {
@@ -82,9 +86,9 @@ public class ClientManager {
     }
 
     /**
-     * 通过SocketChannel获取客户端信息
+     * 通过SocketChannel获取客户端
      * */
-    public static ClientInfo getClientInfo(SocketChannel socketChannel) {
+    public Client getClient(SocketChannel socketChannel) {
         return OnlineClient.get(socketChannel);
     }
 }

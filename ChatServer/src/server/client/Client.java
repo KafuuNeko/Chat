@@ -1,12 +1,15 @@
 package server.client;
 
-import server.loop.Processor;
+import server.Server;
+import server.Processor;
 import util.Pack;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
-public class ClientInfo implements Pack.IPackProcessor {
+public class Client implements Pack.IPackProcessor {
+    //服务器
+    public Server server;
     //此客户端最近一次的心跳时间
     public long lastHeartBeat = 0;
     //通讯密钥，此客户端与服务器的通讯均采用此密钥加密
@@ -19,8 +22,9 @@ public class ClientInfo implements Pack.IPackProcessor {
     //客户端包处理
     private Pack mPack = new Pack(this);
 
-    public ClientInfo(long lastHeartBeat) {
+    public Client(Server server, long lastHeartBeat) {
         this.lastHeartBeat = lastHeartBeat;
+        this.server = server;
     }
 
     /**
@@ -35,17 +39,26 @@ public class ClientInfo implements Pack.IPackProcessor {
         mPack.disposeBytes(socketChannel, data);
     }
 
+    /**
+     * 解包完成后的回调
+     * @param socketChannel 来源客户端
+     *
+     * @param head          包头信息
+     *
+     * @param data          包的数据
+     * */
     @Override
     public void onPackUnpack(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
-        Pack.Operation operation = Pack.getOperation(head.operation);
+        Processor.Operation operation = Processor.getOperation(head.operation);
         if (operation == null) return;
+        //通过操作类型选择包的数据处理器对数据进行处理
         switch (operation) {
             case FirstContact:  //第一次与服务器接触
-                Processor.firstContact(socketChannel, head, data);
+                Processor.firstContact(server, socketChannel, head, data);
                 break;
 
             case HeartBeat:     //心跳包信息
-                Processor.heartBeat(socketChannel, head, data);
+                Processor.heartBeat(server, socketChannel, head, data);
                 break;
         }
     }

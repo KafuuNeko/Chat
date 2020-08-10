@@ -2,7 +2,6 @@ package server.loop;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -10,23 +9,36 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-import server.client.ClientInfo;
-import server.client.ClientManager;
-import server.Definition;
+import server.Server;
 import server.Log;
 
 public class SelectorLoop extends Thread {
-    public Selector selector;
-    public ServerSocketChannel ssChannel;
+    private int maxClientNumber;
+    private Server mServer;
+    private Selector mSelector;
+    private ServerSocketChannel mChannel;
+    private IReceivingListener mReceivingListener;
 
-    public SelectorLoop() throws IOException {
-        selector = Selector.open();
+    /**
+     * 信息处理器构造函数
+     * @param receivingListener 收到信息后对回调监听器
+     *
+     * @param server            服务器对象
+     *
+     * @param port              要绑定对端口
+     * */
+    public SelectorLoop(IReceivingListener receivingListener, Server server, int port, int maxClientNumber) throws IOException {
+        mSelector = Selector.open();
 
-        ssChannel = ServerSocketChannel.open();
-        ssChannel.bind(new InetSocketAddress(Definition.SERVER_PORT));
-        ssChannel.configureBlocking(false);
-        ssChannel.register(selector, SelectionKey.OP_ACCEPT);
+        mChannel = ServerSocketChannel.open();
+        mChannel.bind(new InetSocketAddress(port));
+        mChannel.configureBlocking(false);
+        mChannel.register(mSelector, SelectionKey.OP_ACCEPT);
 
+        mReceivingListener = receivingListener;
+        mServer = server;
+
+        this.maxClientNumber = maxClientNumber;
     }
 
 
@@ -34,12 +46,21 @@ public class SelectorLoop extends Thread {
     public void run() {
 
         try {
-            do {
-                while (Definition.ServerStatus == Definition.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起状态
+            while (mServer.status != Server.Status.SERVER_STATUS_STOP) {
+                while (mServer.status == Server.Status.SERVER_STATUS_SUSPENDED) sleep(1000);//挂起状态
 
-                selector.select();
+                if(mSelector.select() <= 0)
+                {
+                    if (mServer.status == Server.Status.SERVER_STATUS_STOP) break;
+                    if (mServer.status == Server.Status.SERVER_STATUS_RUNNING)
+                    {
+                        Log.warn("mSelector.select() <= 0");
+                        sleep(1000);
+                    }
+                    continue;
+                }
 
-                Set<SelectionKey> selectionKeys = selector.selectedKeys();
+                Set<SelectionKey> selectionKeys = mSelector.selectedKeys();
                 Iterator<SelectionKey> iterator = selectionKeys.iterator();
 
                 while (iterator.hasNext()) {
@@ -48,26 +69,27 @@ public class SelectorLoop extends Thread {
                     try {
                         if (key.isAcceptable()) {
                             //客户端连接请求
-                            if (Definition.ServerStatus == Definition.SERVER_STATUS_RUNNING) {
+                            if (mServer.status == Server.Status.SERVER_STATUS_RUNNING && mServer.clientManager.clientNumber() < maxClientNumber) {
                                 SocketChannel channel = ((ServerSocketChannel) key.channel()).accept();
                                 Log.info("客户端[" + channel.getRemoteAddress() + "]已连接到服务器");
-                                ClientManager.addClient(channel);
+                                mServer.clientManager.addClient(mServer, channel);
 
                                 channel.configureBlocking(false);
-                                channel.register(selector, SelectionKey.OP_READ);
+                                channel.register(mSelector, SelectionKey.OP_READ);
 
                             } else {
-                                //如果服务器不处于运行状态，则拒绝所有连接
+                                //如果服务器不处于运行状态或客户端数量超限，则拒绝连接
                                 ((ServerSocketChannel) key.channel()).accept().close();
+                                Log.warn("服务器已连接客户端超限，已拒绝新到客户端连接");
                             }
 
 
                         } else if (key.isReadable()) {
                             //客户端数据来源
                             //当服务器处于运行状态时，读取通道中的数据
-                            if (Definition.ServerStatus == Definition.SERVER_STATUS_RUNNING) {
+                            if (mServer.status == Server.Status.SERVER_STATUS_RUNNING) {
                                 SocketChannel channel = (SocketChannel) key.channel();
-                                receiveFromChannel(channel);
+                                mReceivingListener.onReceiveFromChannel(channel);
                             }
                         }
 
@@ -77,42 +99,27 @@ public class SelectorLoop extends Thread {
                     iterator.remove();
                 }
 
-            } while (Definition.ServerStatus != Definition.SERVER_STATUS_ERROR);
+            }
 
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             Log.error("SelectorLoop线程出现异常2：" + e.toString());
-        } catch (InterruptedException e) {
-            Log.error("SelectorLoop线程出现异常3：" + e.toString());
+            mServer.status = Server.Status.SERVER_STATUS_STOP;
         }
 
-        ClientManager.stopAllClient();//断开所有连接
+        mServer.clientManager.closeAllClient();//断开所有连接
         Log.info("接收线程已关闭");
     }
 
-    /**
-     * 从客户端获取到数据
-     * @param channel 数据来源客户端
-     * */
-    private void receiveFromChannel(SocketChannel channel) {
-        int count;
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
-        try {
-            while ((count = channel.read(buffer)) > 0) {
-                buffer.flip();//翻转缓冲区
+    public void close() throws IOException
+    {
+        mSelector.close();
+        mChannel.close();
+    }
 
-                byte[] bytes = new byte[buffer.remaining()];
-                buffer.get(bytes);
-
-                ClientInfo info = ClientManager.getClientInfo(channel);
-                if (info != null) info.disposeBytes(channel, bytes);
-            }
-
-            //如果是-1则客户端已和服务器多开连接
-            if (count < 0) ClientManager.closeClient(channel, true);
-        } catch (IOException e) {
-            Log.warn("SelectorLoop.readFromChannel出现异常：" + e.toString());
-        }
+    public interface IReceivingListener
+    {
+        void onReceiveFromChannel(SocketChannel channel);
     }
 
 }

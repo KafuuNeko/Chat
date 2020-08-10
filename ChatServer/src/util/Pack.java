@@ -181,6 +181,9 @@ public class Pack {
     }
 
 
+    /**
+     * 数据包头信息类
+     * */
     public static class PackHead {
         public int versions;
         public int operation;
@@ -202,18 +205,12 @@ public class Pack {
 
     }
 
+    /**
+     * 包处理回调接口
+     * 当包处理器完整当解析出一个数据包时将通过此接口回调
+     * */
     public interface IPackProcessor {
         void onPackUnpack(SocketChannel socketChannel, PackHead head, byte[] data);
     }
 
-    public enum Operation {
-        FirstContact,
-        HeartBeat
-    }
-
-    public static Operation getOperation(int index) {
-        Operation[] ops = Operation.values();
-        if (ops.length <= index) return null;
-        return ops[index];
-    }
 }

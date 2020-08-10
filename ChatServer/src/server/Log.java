@@ -25,7 +25,7 @@ public class Log {
      * @param msg 日志信息
      */
     public static void debug(String msg) {
-        if (!Definition.IS_DEBUG) return;
+        if (!Main.IS_DEBUG) return;
         if (isWindows) {
             System.out.println(getDateTime() + " [DEBUG] " + msg);
         } else {
