@@ -12,21 +12,23 @@ import java.util.*;
  * */
 public class ClientManager {
 
-    //在线的客户端以及对应的客户端信息
-    public Map<SocketChannel, Client> OnlineClient = new HashMap<>();
+    //Channel - Client 映射表
+    public Map<SocketChannel, Client> ChannelToClient = new HashMap<>();
+    //UID - Channel 映射表
+    public Map<Long, SocketChannel> UserToChannel = new HashMap<>();
 
     /**
      * 获取当前在线的客户端数量
      * */
     public int clientNumber() {
-        return OnlineClient.size();
+        return ChannelToClient.size();
     }
 
     /**
      * 添加新的在线客户端
      * */
     public void addClient(Server server, SocketChannel cl) {
-        OnlineClient.put(cl, new Client(server, System.currentTimeMillis()));
+        ChannelToClient.put(cl, new Client(server, System.currentTimeMillis()));
     }
 
     /**
@@ -35,7 +37,7 @@ public class ClientManager {
      * @param remove_map 关闭此客户端后是否立即从Map中移除
      * */
     public void closeClient(SocketChannel cl, boolean remove_map) {
-        Client client = OnlineClient.get(cl);
+        Client client = ChannelToClient.get(cl);
         try {
             if (client == null) {
                 Log.warn("未找到符合的客户端：" + cl.getRemoteAddress());
@@ -43,8 +45,9 @@ public class ClientManager {
                 if (cl.isOpen()) {
                     Log.info("关闭客户端：" + cl.getRemoteAddress());
                     cl.close();
+                    if (client.uid != -1) UserToChannel.remove(client.uid);
                 }
-                if (remove_map) OnlineClient.remove(cl);
+                if (remove_map) ChannelToClient.remove(cl);
             }
         } catch (IOException e) {
             Log.warn("关闭客户端时发生异常：" + e.toString());
@@ -55,8 +58,8 @@ public class ClientManager {
      * 主动关闭所有在线的客户端
      * */
     public void closeAllClient() {
-        for (SocketChannel sc : OnlineClient.keySet()) closeClient(sc, false);
-        OnlineClient.clear();
+        for (SocketChannel sc : ChannelToClient.keySet()) closeClient(sc, false);
+        ChannelToClient.clear();
     }
 
     /**
@@ -67,8 +70,8 @@ public class ClientManager {
         Set<SocketChannel> closed = new HashSet<>();
 
         long now = System.currentTimeMillis();
-        for (SocketChannel sc : OnlineClient.keySet()) {
-            Client client = OnlineClient.get(sc);
+        for (SocketChannel sc : ChannelToClient.keySet()) {
+            Client client = ChannelToClient.get(sc);
             if (client != null) {
                 if (now - client.lastHeartBeat >= 60 * 1000) {
                     try {
@@ -82,13 +85,19 @@ public class ClientManager {
             }
         }
 
-        for (SocketChannel sc : closed) OnlineClient.remove(sc);
+        for (SocketChannel sc : closed) ChannelToClient.remove(sc);
     }
 
     /**
      * 通过SocketChannel获取客户端
      * */
     public Client getClient(SocketChannel socketChannel) {
-        return OnlineClient.get(socketChannel);
+        return ChannelToClient.get(socketChannel);
+    }
+
+    public void updateUserToChannel(long uid, SocketChannel channel)
+    {
+        UserToChannel.remove(uid);
+        UserToChannel.put(uid, channel);
     }
 }

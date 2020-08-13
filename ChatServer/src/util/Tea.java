@@ -82,11 +82,40 @@ public class Tea {
         return tempInt;
     }
 
-    //加密String 编码：UTF-8
+    /**
+     * TEA加密字符串，默认使用UTF-8编码
+     * @param info  待加密的数据
+     *
+     * @param key   用于加密的16位密钥
+     *
+     * @return 加密结果
+     * */
     public static byte[] encryptByTea(String info, byte[] key) {
         return encryptByTea(info, key, StandardCharsets.UTF_8);
     }
 
+    /**
+     * TEA解密数据为字符串，默认使用UTF-8编码
+     * @param secretInfo    密文数据
+     *
+     * @param key           解密密文的16位密钥
+     *
+     * @return 解密结果，如果解密失败则返回null
+     * */
+    public static String decryptByTea(byte[] secretInfo, byte[] key) {
+        return decryptByTea(secretInfo, key, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * TEA加密字符串
+     * @param info  待加密的数据
+     *
+     * @param key   用于加密的16位密钥
+     *
+     * @param charset 字符串编码类型
+     *
+     * @return 加密结果
+     * */
     public static byte[] encryptByTea(String info, byte[] key, Charset charset) {
         byte[] temp = info.getBytes(charset);
         int fill = 8 - temp.length % 8;//若temp的位数不足8的倍数,需要填充的位数
@@ -101,12 +130,19 @@ public class Tea {
         return result;
     }
 
-    public static String decryptByTea(byte[] secretInfo, byte[] key) {
-        return decryptByTea(secretInfo, key, StandardCharsets.UTF_8);
-    }
-
-    //通过TEA算法解密信息
+    /**
+     * TEA解密数据为字符串，默认使用UTF-8编码
+     * @param secretInfo    密文数据
+     *
+     * @param key           解密密文的16位密钥
+     *
+     * @param charset       字符串编码类型
+     *
+     * @return 解密结果，如果解密失败则返回null
+     * */
     public static String decryptByTea(byte[] secretInfo, byte[] key, Charset charset) {
+        if (secretInfo.length % 8 != 0) return null;
+
         byte[] decryptStr = null;
         byte[] tempDecrypt = new byte[secretInfo.length];
         for (int offset = 0; offset < secretInfo.length; offset += 8) {

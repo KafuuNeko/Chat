@@ -1,5 +1,6 @@
 package server.client;
 
+import server.Log;
 import server.Server;
 import server.Processor;
 import util.Pack;
@@ -18,6 +19,10 @@ public class Client implements Pack.IPackProcessor {
     public String deviceName = "";
     //客户端心跳包验证口令
     public String heartBeatVerify = "";
+    //用户ID
+    public long uid = -1;
+    //登录时获得的令牌
+    public String login_token = null;
 
     //客户端包处理
     private Pack mPack = new Pack(this);
@@ -49,17 +54,25 @@ public class Client implements Pack.IPackProcessor {
      * */
     @Override
     public void onPackUnpack(SocketChannel socketChannel, Pack.PackHead head, byte[] data) {
-        Processor.Operation operation = Processor.getOperation(head.operation);
-        if (operation == null) return;
-        //通过操作类型选择包的数据处理器对数据进行处理
-        switch (operation) {
-            case FirstContact:  //第一次与服务器接触
-                Processor.firstContact(server, socketChannel, head, data);
-                break;
+        try {
+            Processor.Operation operation = Processor.getOperation(head.operation);
+            if (operation == null) return;
+            //通过操作类型选择包的数据处理器对数据进行处理
+            switch (operation) {
+                case FirstContact:  //第一次与服务器接触
+                    Processor.firstContact(server, socketChannel, head, data);
+                    break;
 
-            case HeartBeat:     //心跳包信息
-                Processor.heartBeat(server, socketChannel, head, data);
-                break;
+                case HeartBeat:     //心跳包信息
+                    Processor.heartBeat(server, socketChannel, head, data);
+                    break;
+
+                case UserLogin:         //用户登录
+                    Processor.userLogin(server, socketChannel, head, data);
+                    break;
+            }
+        } catch (Exception e) {
+            Log.warn(e.toString());
         }
     }
 }

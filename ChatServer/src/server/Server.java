@@ -7,12 +7,15 @@ import java.util.Arrays;
 
 import server.client.Client;
 import server.client.ClientManager;
+import server.database.DataBase;
+import server.database.MySQL;
 import server.loop.HeartBeatLoop;
 import server.loop.SelectorLoop;
 
 public class Server implements SelectorLoop.IReceivingListener{
     private SelectorLoop mSelectorLoop;
     public ClientManager clientManager;
+    public DataBase dataBase = new MySQL();
 
     /**
      * 服务器状态

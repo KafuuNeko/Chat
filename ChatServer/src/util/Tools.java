@@ -5,6 +5,7 @@ import server.Log;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Base64;
 import java.util.Random;
 
 public class Tools {
@@ -17,6 +18,16 @@ public class Tools {
         byte[] key = new byte[length];
         new Random().nextBytes(key);
         return key;
+    }
+
+    /**
+     * 随机生成令牌
+     * */
+    public static String RandomlyToken(int length)
+    {
+        byte[] token_byte = new byte[length];
+        new Random().nextBytes(token_byte);
+        return Base64.getEncoder().encodeToString(token_byte);
     }
 
     /**
